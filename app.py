@@ -3,12 +3,8 @@ import os
 
 import joblib
 import pandas as pd
-import plotly.express as px
 from flask import Flask, render_template, request, Response, send_file
 from werkzeug.utils import secure_filename
-from reportlab.lib.units import inch
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from datetime import datetime
 from sklearn.metrics import (
@@ -31,10 +27,22 @@ ENCODER_PATH = "model/label_encoders.pkl"
 FEATURES_PATH = "model/features.pkl"
 DATA_PATH = "dataset/WA_Fn-UseC_-HR-Employee-Attrition.csv"
 
-model = joblib.load(MODEL_PATH)
-scaler = joblib.load(SCALER_PATH)
-label_encoders = joblib.load(ENCODER_PATH)
-features = joblib.load(FEATURES_PATH)
+model = None
+scaler = None
+label_encoders = None
+features = None
+
+
+def load_model_files():
+    global model, scaler, label_encoders, features
+
+    if model is None:
+        model = joblib.load(MODEL_PATH)
+        scaler = joblib.load(SCALER_PATH)
+        label_encoders = joblib.load(ENCODER_PATH)
+        features = joblib.load(FEATURES_PATH)
+
+    return model, scaler, label_encoders, features
 prediction_history = []
 latest_prediction_report = {}
 
