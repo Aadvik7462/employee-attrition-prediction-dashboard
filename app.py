@@ -6,21 +6,11 @@ import pandas as pd
 import plotly.express as px
 from flask import Flask, render_template, request, Response, send_file
 from werkzeug.utils import secure_filename
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
 from reportlab.lib.units import inch
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.dml.color import RGBColor
 from datetime import datetime
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from PIL import Image, ImageDraw, ImageFont
 from sklearn.metrics import (
     accuracy_score,
     precision_score,
