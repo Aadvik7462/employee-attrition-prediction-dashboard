@@ -17,10 +17,7 @@ The application helps HR professionals analyze employee attrition, predict emplo
 ---
 
 # 🚀 Live Demo
-
-**Render Deployment**
-
-> Add your Render URL here after deployment.
+https://employee-attrition-prediction-dashboard.onrender.com
 
 ---
 
