@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - HR Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>HR Analytics</h2>
+            <p>Attrition Platform</p>
+        </div>
+        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Toggle Theme</button>
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        <a href="/predict" class="nav-link">🤖 Prediction</a>
+        <a href="/admin" class="nav-link active">📂 Upload Dataset</a>
+        <a href="/employees" class="nav-link">👥 Employees</a>
+        <a href="/reports" class="nav-link">📄 Reports</a>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="dashboard-header">
+            <div>
+                <h1>Enterprise Admin Dashboard</h1>
+                <p>Manage dataset uploads, validation, and model retraining.</p>
+            </div>
+
+            <div class="header-info">
+                <p><b>Dataset:</b> {% if dataset_exists %}Available{% else %}Missing{% endif %}</p>
+                <p><b>Rows:</b> {{ total_rows }}</p>
+                <p><b>Updated:</b> {{ last_updated }}</p>
+            </div>
+        </div>
+
+        {% if message %}
+        <div class="alert success-alert">{{ message }}</div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert error-alert">{{ error }}</div>
+        {% endif %}
+
+        <div class="enterprise-cards">
+
+            <div class="enterprise-card blue">
+                <div class="icon">📁</div>
+                <h2>{{ total_rows }}</h2>
+                <p>Dataset Rows</p>
+                <span>Total employee records</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">📊</div>
+                <h2>{{ total_columns }}</h2>
+                <p>Dataset Columns</p>
+                <span>Total available features</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">🏢</div>
+                <h2>{{ departments_count }}</h2>
+                <p>Departments</p>
+                <span>Unique departments</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">💼</div>
+                <h2>{{ job_roles_count }}</h2>
+                <p>Job Roles</p>
+                <span>Unique job profiles</span>
+            </div>
+
+            <div class="enterprise-card blue">
+                <div class="icon">📈</div>
+                <h2>{{ attrition_rate }}%</h2>
+                <p>Attrition Rate</p>
+                <span>Dataset attrition percentage</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">💾</div>
+                <h2>{{ dataset_size }} KB</h2>
+                <p>Dataset Size</p>
+                <span>Current CSV file size</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">⚠️</div>
+                <h2>{{ missing_values }}</h2>
+                <p>Missing Values</p>
+                <span>Null values in dataset</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">📌</div>
+                <h2>{{ duplicate_rows }}</h2>
+                <p>Duplicate Rows</p>
+                <span>Repeated employee records</span>
+            </div>
+
+        </div>
+
+        <div class="admin-grid">
+
+            <div class="admin-card">
+                <h2>Dataset Upload & Retraining</h2>
+                <p class="subtitle">Upload a CSV dataset and automatically retrain the machine learning model.</p>
+
+                <form method="POST" enctype="multipart/form-data" class="upload-form">
+                    <label>Select CSV Dataset</label>
+                    <input type="file" name="dataset" accept=".csv" required>
+                    <button type="submit" name="action" value="upload">Upload & Retrain Model</button>
+                </form>
+
+                <form method="POST" class="upload-form">
+                    <button type="submit" name="action" value="retrain" class="secondary-btn">
+                        Retrain Existing Dataset
+                    </button>
+                </form>
+            </div>
+
+            <div class="admin-card validation-card">
+                <h2>Dataset Validation</h2>
+
+                <div class="validation-status {{ validation_class }}">
+                    {{ validation_status }}
+                </div>
+
+                <div class="summary-row">
+                    <span>Missing Values</span>
+                    <strong>{{ missing_values }}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Duplicate Rows</span>
+                    <strong>{{ duplicate_rows }}</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span>Missing Columns</span>
+                    <strong>{{ missing_columns|length }}</strong>
+                </div>
+
+                {% if missing_columns %}
+                <div class="missing-columns-box">
+                    {% for col in missing_columns %}
+                    <span>{{ col }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <h2 class="section-title">Model Information</h2>
+
+        <div class="enterprise-cards model-cards">
+
+            <div class="enterprise-card blue">
+                <div class="icon">🤖</div>
+                <h2>RF</h2>
+                <p>Algorithm</p>
+                <span>Random Forest Classifier</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">🎯</div>
+                <h2>{{ model_metrics.accuracy }}%</h2>
+                <p>Accuracy</p>
+                <span>Latest model score</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">✅</div>
+                <h2>{{ model_metrics.precision }}%</h2>
+                <p>Precision</p>
+                <span>Positive prediction quality</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">📌</div>
+                <h2>{{ model_metrics.recall }}%</h2>
+                <p>Recall</p>
+                <span>Leave cases detected</span>
+            </div>
+
+            <div class="enterprise-card blue">
+                <div class="icon">⚖️</div>
+                <h2>{{ model_metrics.f1_score }}%</h2>
+                <p>F1 Score</p>
+                <span>Balanced metric</span>
+            </div>
+
+        </div>
+
+        <div class="admin-grid">
+
+            <div class="admin-card full-admin-card">
+                <h2>Dataset Columns</h2>
+
+                <div class="columns-box">
+                    {% for column in columns %}
+                    <span>{{ column }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="admin-card activity-card">
+                <h2>Admin Activity Log</h2>
+
+                <ul class="activity-log">
+                    {% for log in activity_logs %}
+                    <li>{{ log }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+    <footer class="app-footer">
+    <p>Employee Attrition Analytics Dashboard</p>
+    <span>Built with Flask • Machine Learning • Plotly • Reports</span>
+    </footer>
+    </main>
+
+</div>
+<script>
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("theme", "dark");
+    } else {
+        localStorage.setItem("theme", "light");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+
+    const forms = document.querySelectorAll("form");
+    const loader = document.getElementById("pageLoader");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function () {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+        });
+    });
+});
+</script>
+</body>
+<div id="pageLoader" class="page-loader">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+</div>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reports - HR Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>HR Analytics</h2>
+            <p>Attrition Platform</p>
+        </div>
+        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Toggle Theme</button>
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        <a href="/predict" class="nav-link">🤖 Prediction</a>
+        <a href="/admin" class="nav-link">📂 Upload Dataset</a>
+        <a href="/employees" class="nav-link">👥 Employees</a>
+        <a href="/reports" class="nav-link active">📄 Reports</a>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="dashboard-header">
+            <div>
+                <h1>Reports Center</h1>
+                <p>Download executive HR analytics reports in PDF, Excel, PowerPoint, and PNG formats.</p>
+            </div>
+
+            <div class="header-info">
+                <p><b>Total Reports:</b> 4</p>
+                <p><b>Status:</b> Ready</p>
+                <p><b>Formats:</b> PDF, XLSX, PPTX, PNG</p>
+            </div>
+        </div>
+
+        <div class="enterprise-cards">
+
+            <div class="enterprise-card blue">
+                <div class="icon">👥</div>
+                <h2>{{ total_employees }}</h2>
+                <p>Total Employees</p>
+                <span>Available in dataset</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">🏢</div>
+                <h2>{{ departments_count }}</h2>
+                <p>Departments</p>
+                <span>HR business units</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">💼</div>
+                <h2>{{ job_roles_count }}</h2>
+                <p>Job Roles</p>
+                <span>Employee role categories</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">📈</div>
+                <h2>{{ attrition_rate }}%</h2>
+                <p>Attrition Rate</p>
+                <span>Overall workforce risk</span>
+            </div>
+
+            <div class="enterprise-card blue">
+                <div class="icon">🎯</div>
+                <h2>{{ model_accuracy }}%</h2>
+                <p>Model Accuracy</p>
+                <span>Latest trained model</span>
+            </div>
+
+        </div>
+
+        <div class="report-status-panel">
+            <h2>Report Availability</h2>
+
+            <div class="status-grid">
+                <div>📄 PDF Report <span>Ready</span></div>
+                <div>📊 Excel Report <span>Ready</span></div>
+                <div>📽 PowerPoint Report <span>Ready</span></div>
+                <div>🖼 Snapshot Report <span>Ready</span></div>
+            </div>
+        </div>
+
+        <div class="report-grid enhanced-report-grid">
+
+            <div class="report-card enhanced-report-card">
+                <div class="report-badge">PDF</div>
+                <div class="report-icon">📄</div>
+                <h2>Executive PDF Report</h2>
+                <p>Best for quick executive review and sharing.</p>
+
+                <ul>
+                    <li>Executive Summary</li>
+                    <li>KPI Overview</li>
+                    <li>HR Insights</li>
+                    <li>Recommendations</li>
+                </ul>
+
+                <a href="/reports/pdf">Download PDF</a>
+            </div>
+
+            <div class="report-card enhanced-report-card">
+                <div class="report-badge">XLSX</div>
+                <div class="report-icon">📊</div>
+                <h2>Excel Analytics Report</h2>
+                <p>Best for detailed data analysis and offline review.</p>
+
+                <ul>
+                    <li>Employee Data</li>
+                    <li>Department Analysis</li>
+                    <li>Model Performance</li>
+                    <li>Feature Importance</li>
+                </ul>
+
+                <a href="/reports/excel">Download Excel</a>
+            </div>
+
+            <div class="report-card enhanced-report-card">
+                <div class="report-badge">PPTX</div>
+                <div class="report-icon">📽</div>
+                <h2>PowerPoint Presentation</h2>
+                <p>Best for presentations, meetings, and interviews.</p>
+
+                <ul>
+                    <li>Executive KPI Slides</li>
+                    <li>Insights Summary</li>
+                    <li>ML Performance</li>
+                    <li>Recommendations</li>
+                </ul>
+
+                <a href="/reports/ppt">Download PowerPoint</a>
+            </div>
+
+            <div class="report-card enhanced-report-card">
+                <div class="report-badge">PNG</div>
+                <div class="report-icon">🖼</div>
+                <h2>Dashboard Snapshot</h2>
+                <p>Best for quick sharing as an image.</p>
+
+                <ul>
+                    <li>Dashboard Overview</li>
+                    <li>Executive KPIs</li>
+                    <li>Key Insights</li>
+                    <li>Summary Image</li>
+                </ul>
+
+                <a href="/reports/snapshot">Download Image</a>
+            </div>
+
+        </div>
+    <footer class="app-footer">
+    <p>Employee Attrition Analytics Dashboard</p>
+    <span>Built with Flask • Machine Learning • Plotly • Reports</span>
+    </footer>
+    </main>
+
+</div>
+<script>
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("theme", "dark");
+    } else {
+        localStorage.setItem("theme", "light");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+
+    const forms = document.querySelectorAll("form");
+    const loader = document.getElementById("pageLoader");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function () {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+        });
+    });
+});
+</script>
+</body>
+<div id="pageLoader" class="page-loader">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+</div>
+</html>

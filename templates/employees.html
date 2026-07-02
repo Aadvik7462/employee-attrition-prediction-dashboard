@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Explorer - HR Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>HR Analytics</h2>
+            <p>Attrition Platform</p>
+        </div>
+        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Toggle Theme</button>
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        <a href="/predict" class="nav-link">🤖 Prediction</a>
+        <a href="/admin" class="nav-link">📂 Upload Dataset</a>
+        <a href="/employees" class="nav-link active">👥 Employees</a>
+        <a href="/reports" class="nav-link">📄 Reports</a>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="dashboard-header">
+            <div>
+                <h1>Advanced Employee Explorer</h1>
+                <p>Search, filter, sort, paginate, and export employee records.</p>
+            </div>
+
+            <div class="header-info">
+                <p><b>Total Employees:</b> {{ total_employees }}</p>
+                <p><b>Filtered:</b> {{ filtered_count }}</p>
+                <p><b>Page:</b> {{ page }} of {{ total_pages }}</p>
+            </div>
+        </div>
+
+        <div class="enterprise-cards model-cards">
+
+            <div class="enterprise-card blue">
+                <div class="icon">👥</div>
+                <h2>{{ total_employees }}</h2>
+                <p>Total Employees</p>
+                <span>Complete dataset records</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">🔎</div>
+                <h2>{{ filtered_count }}</h2>
+                <p>Filtered Employees</p>
+                <span>After current filters</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">🎂</div>
+                <h2>{{ avg_age }}</h2>
+                <p>Average Age</p>
+                <span>Filtered average</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">💰</div>
+                <h2>₹{{ avg_income }}</h2>
+                <p>Average Income</p>
+                <span>Filtered average salary</span>
+            </div>
+
+        </div>
+
+        <div class="employee-filter-card">
+            <form method="GET" action="/employees" class="employee-filter-form" id="employeeFilterForm">
+
+                <input
+                    type="text"
+                    name="search"
+                    id="liveSearch"
+                    placeholder="Live search any employee data..."
+                    value="{{ search_query }}"
+                >
+
+                <select name="department">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if dept == selected_department %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="job_role">
+                    <option value="">All Job Roles</option>
+                    {% for role in job_roles %}
+                    <option value="{{ role }}" {% if role == selected_job_role %}selected{% endif %}>{{ role }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="gender">
+                    <option value="">All Genders</option>
+                    {% for gender in genders %}
+                    <option value="{{ gender }}" {% if gender == selected_gender %}selected{% endif %}>{{ gender }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="attrition">
+                    <option value="">All Attrition</option>
+                    {% for attrition in attritions %}
+                    <option value="{{ attrition }}" {% if attrition == selected_attrition %}selected{% endif %}>{{ attrition }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Apply</button>
+
+                <a href="/employees" class="clear-btn">Clear</a>
+
+                <a
+                    href="/employees/export?search={{ search_query }}&department={{ selected_department }}&job_role={{ selected_job_role }}&gender={{ selected_gender }}&attrition={{ selected_attrition }}"
+                    class="export-btn"
+                >
+                    Export Filtered CSV
+                </a>
+
+            </form>
+        </div>
+
+        <div class="employee-table-card">
+            <div class="table-scroll">
+                <table class="employee-table advanced-table">
+                    <thead>
+                        <tr>
+                            {% for column in columns %}
+                            <th>
+                                {% set next_order = "desc" if sort_column == column and sort_order == "asc" else "asc" %}
+                                <a href="/employees?sort={{ column }}&order={{ next_order }}&search={{ search_query }}&department={{ selected_department }}&job_role={{ selected_job_role }}&gender={{ selected_gender }}&attrition={{ selected_attrition }}">
+                                    {{ column }}
+                                    {% if sort_column == column %}
+                                        {% if sort_order == "asc" %} ↑ {% else %} ↓ {% endif %}
+                                    {% else %}
+                                        ↕
+                                    {% endif %}
+                                </a>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for employee in employees %}
+                        <tr>
+                            {% for column in columns %}
+                            <td>{{ employee[column] }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pagination enhanced-pagination">
+
+            {% if page > 1 %}
+            <a href="/employees?page={{ page - 1 }}&search={{ search_query }}&department={{ selected_department }}&job_role={{ selected_job_role }}&gender={{ selected_gender }}&attrition={{ selected_attrition }}&sort={{ sort_column }}&order={{ sort_order }}">
+                Previous
+            </a>
+            {% endif %}
+
+            <span>Page {{ page }} of {{ total_pages }}</span>
+
+            {% if page < total_pages %}
+            <a href="/employees?page={{ page + 1 }}&search={{ search_query }}&department={{ selected_department }}&job_role={{ selected_job_role }}&gender={{ selected_gender }}&attrition={{ selected_attrition }}&sort={{ sort_column }}&order={{ sort_order }}">
+                Next
+            </a>
+            {% endif %}
+
+        </div>
+    <footer class="app-footer">
+    <p>Employee Attrition Analytics Dashboard</p>
+    <span>Built with Flask • Machine Learning • Plotly • Reports</span>
+    </footer>
+    </main>
+
+</div>
+
+<script>
+let searchTimer;
+const liveSearch = document.getElementById("liveSearch");
+const form = document.getElementById("employeeFilterForm");
+
+if (liveSearch) {
+    liveSearch.addEventListener("keyup", function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            form.submit();
+        }, 700);
+    });
+}
+</script>
+<script>
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("theme", "dark");
+    } else {
+        localStorage.setItem("theme", "light");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+
+    const forms = document.querySelectorAll("form");
+    const loader = document.getElementById("pageLoader");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function () {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+        });
+    });
+});
+</script>
+</body>
+<div id="pageLoader" class="page-loader">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+</div>
+</html>

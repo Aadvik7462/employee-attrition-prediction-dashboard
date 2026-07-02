@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enterprise HR Analytics Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>HR Analytics</h2>
+            <p>Attrition Platform</p>
+        </div>
+        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Toggle Theme</button>
+
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/dashboard" class="nav-link active">📊 Dashboard</a>
+        <a href="/predict" class="nav-link">🤖 Prediction</a>
+        <a href="/admin" class="nav-link">📂 Upload Dataset</a>
+        <a href="/employees" class="nav-link">👥 Employees</a>
+        <a href="/reports" class="nav-link">📄 Reports</a>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="dashboard-header">
+            <div>
+                <h1>Employee Attrition Dashboard</h1>
+                <p>Enterprise-level HR analytics with machine learning insights.</p>
+            </div>
+
+            <div class="header-info">
+                <p><b>Dataset:</b> IBM HR Analytics</p>
+                <p><b>Records:</b> {{ total_employees }}</p>
+                <p><b>Filtered:</b> {{ filtered_records }}</p>
+                <p><b>Status:</b> Active</p>
+            </div>
+        </div>
+
+        <div class="dashboard-filter-card">
+            <form method="GET" action="/dashboard" class="dashboard-filter-form">
+
+                <select name="department">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if dept == selected_department %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="job_role">
+                    <option value="">All Job Roles</option>
+                    {% for role in job_roles %}
+                    <option value="{{ role }}" {% if role == selected_job_role %}selected{% endif %}>{{ role }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="gender">
+                    <option value="">All Genders</option>
+                    {% for gender in genders %}
+                    <option value="{{ gender }}" {% if gender == selected_gender %}selected{% endif %}>{{ gender }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="attrition">
+                    <option value="">All Attrition</option>
+                    {% for item in attritions %}
+                    <option value="{{ item }}" {% if item == selected_attrition %}selected{% endif %}>{{ item }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="education_field">
+                    <option value="">All Education Fields</option>
+                    {% for field in education_fields %}
+                    <option value="{{ field }}" {% if field == selected_education %}selected{% endif %}>{{ field }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="business_travel">
+                    <option value="">All Business Travel</option>
+                    {% for travel in business_travels %}
+                    <option value="{{ travel }}" {% if travel == selected_travel %}selected{% endif %}>{{ travel }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Apply Filters</button>
+                <a href="/dashboard" class="reset-filter-btn">Reset</a>
+
+            </form>
+
+            <div class="filter-summary">
+                Showing <strong>{{ filtered_records }}</strong> filtered records.
+            </div>
+        </div>
+
+        <div class="enterprise-cards">
+
+            <div class="enterprise-card blue">
+                <div class="icon">👥</div>
+                <h2>{{ total_employees }}</h2>
+                <p>Total Employees</p>
+                <span>Employees in current filter</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">🚪</div>
+                <h2>{{ attrition_count }}</h2>
+                <p>Employees Left</p>
+                <span>Attrition cases</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">✅</div>
+                <h2>{{ active_count }}</h2>
+                <p>Active Employees</p>
+                <span>Currently retained</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">📈</div>
+                <h2>{{ attrition_rate }}%</h2>
+                <p>Attrition Rate</p>
+                <span>Overall risk indicator</span>
+            </div>
+
+            <div class="enterprise-card blue">
+                <div class="icon">🎂</div>
+                <h2>{{ avg_age }}</h2>
+                <p>Average Age</p>
+                <span>Employee age profile</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">💰</div>
+                <h2>₹{{ avg_income }}</h2>
+                <p>Avg Monthly Income</p>
+                <span>Salary benchmark</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">🏢</div>
+                <h2>{{ avg_years }}</h2>
+                <p>Avg Years at Company</p>
+                <span>Retention duration</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">⏳</div>
+                <h2>{{ avg_promotion }}</h2>
+                <p>Avg Years Since Promotion</p>
+                <span>Career movement indicator</span>
+            </div>
+
+        </div>
+
+        <h2 class="section-title">Executive Insights</h2>
+
+        <div class="insight-grid enterprise-insights">
+            <div class="insight-card">
+                <h3>Highest Attrition Department</h3>
+                <p>{{ insights.highest_dept }}</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>Highest Attrition Job Role</h3>
+                <p>{{ insights.highest_role }}</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>Employees Working Overtime</h3>
+                <p>{{ insights.overtime_count }}</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>Low Job Satisfaction Employees</h3>
+                <p>{{ insights.low_job_satisfaction }}</p>
+            </div>
+
+            <div class="insight-card">
+                <h3>Highest Income Department</h3>
+                <p>{{ insights.highest_income_dept }}</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">Machine Learning Model Insights</h2>
+
+        <div class="enterprise-cards model-cards">
+
+            <div class="enterprise-card blue">
+                <div class="icon">🎯</div>
+                <h2>{{ model_metrics.accuracy }}%</h2>
+                <p>Accuracy</p>
+                <span>Correct predictions</span>
+            </div>
+
+            <div class="enterprise-card green">
+                <div class="icon">✅</div>
+                <h2>{{ model_metrics.precision }}%</h2>
+                <p>Precision</p>
+                <span>Positive prediction quality</span>
+            </div>
+
+            <div class="enterprise-card orange">
+                <div class="icon">📌</div>
+                <h2>{{ model_metrics.recall }}%</h2>
+                <p>Recall</p>
+                <span>Leave cases detected</span>
+            </div>
+
+            <div class="enterprise-card red">
+                <div class="icon">⚖️</div>
+                <h2>{{ model_metrics.f1_score }}%</h2>
+                <p>F1 Score</p>
+                <span>Balanced score</span>
+            </div>
+
+            <div class="enterprise-card blue">
+                <div class="icon">📉</div>
+                <h2>{{ model_metrics.roc_auc }}%</h2>
+                <p>ROC AUC</p>
+                <span>Model separation power</span>
+            </div>
+
+        </div>
+
+        <div class="grid-2">
+            <div class="plot-card">
+                {{ charts.feature_importance | safe }}
+            </div>
+
+            <div class="confusion-card">
+                <h2>Confusion Matrix</h2>
+
+                <table class="confusion-table">
+                    <tr>
+                        <th></th>
+                        <th>Predicted Stay</th>
+                        <th>Predicted Leave</th>
+                    </tr>
+                    <tr>
+                        <th>Actual Stay</th>
+                        <td>{{ model_metrics.confusion_matrix[0][0] }}</td>
+                        <td>{{ model_metrics.confusion_matrix[0][1] }}</td>
+                    </tr>
+                    <tr>
+                        <th>Actual Leave</th>
+                        <td>{{ model_metrics.confusion_matrix[1][0] }}</td>
+                        <td>{{ model_metrics.confusion_matrix[1][1] }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.correlation | safe }}</div>
+            <div class="plot-card">{{ charts.probability_distribution | safe }}</div>
+        </div>
+
+        <h2 class="section-title">Attrition Overview</h2>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.department | safe }}</div>
+            <div class="plot-card">{{ charts.overtime | safe }}</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.gender | safe }}</div>
+            <div class="plot-card">{{ charts.marital | safe }}</div>
+        </div>
+
+        <div class="plot-card full-chart">
+            {{ charts.jobrole | safe }}
+        </div>
+
+        <h2 class="section-title">Employee Profile Analysis</h2>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.age | safe }}</div>
+            <div class="plot-card">{{ charts.income | safe }}</div>
+        </div>
+
+        <div class="plot-card full-chart">
+            {{ charts.years | safe }}
+        </div>
+
+        <h2 class="section-title">Advanced HR Factors</h2>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.education_field | safe }}</div>
+            <div class="plot-card">{{ charts.business_travel | safe }}</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.job_satisfaction | safe }}</div>
+            <div class="plot-card">{{ charts.work_life | safe }}</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="plot-card">{{ charts.performance | safe }}</div>
+            <div class="plot-card">{{ charts.environment | safe }}</div>
+        </div>
+
+        <div class="plot-card full-chart">
+            {{ charts.stock | safe }}
+        </div>
+    <footer class="app-footer">
+    <p>Employee Attrition Analytics Dashboard</p>
+    <span>Built with Flask • Machine Learning • Plotly • Reports</span>
+    </footer>
+    </main>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const numbers = document.querySelectorAll(".enterprise-card h2");
+
+    numbers.forEach((num) => {
+        const text = num.innerText;
+        const clean = text.replace(/[₹,%]/g, "");
+
+        if (!isNaN(clean) && clean.trim() !== "") {
+            const finalValue = parseFloat(clean);
+            let current = 0;
+            const increment = finalValue / 40;
+
+            const hasRupee = text.includes("₹");
+            const hasPercent = text.includes("%");
+
+            const timer = setInterval(() => {
+                current += increment;
+
+                if (current >= finalValue) {
+                    current = finalValue;
+                    clearInterval(timer);
+                }
+
+                let display = finalValue % 1 === 0 ? Math.round(current) : current.toFixed(1);
+
+                if (hasRupee) {
+                    display = "₹" + display;
+                }
+
+                if (hasPercent) {
+                    display = display + "%";
+                }
+
+                num.innerText = display;
+            }, 25);
+        }
+    });
+});
+</script>
+ <script>
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("theme", "dark");
+    } else {
+        localStorage.setItem("theme", "light");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+
+    const forms = document.querySelectorAll("form");
+    const loader = document.getElementById("pageLoader");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function () {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+        });
+    });
+});
+</script>
+</body>
+<div id="pageLoader" class="page-loader">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+</div>
+</html>

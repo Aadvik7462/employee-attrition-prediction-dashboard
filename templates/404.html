@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>404 - Page Not Found</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="error-page">
+    <div class="error-card">
+        <h1>404</h1>
+        <h2>Page Not Found</h2>
+        <p>The page you are looking for does not exist.</p>
+        <a href="/dashboard">Back to Dashboard</a>
+    </div>
+</div>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>500 - Server Error</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="error-page">
+    <div class="error-card">
+        <h1>500</h1>
+        <h2>Internal Server Error</h2>
+        <p>Something went wrong while processing your request.</p>
+        <a href="/dashboard">Back to Dashboard</a>
+    </div>
+</div>
+
+</body>
+</html>

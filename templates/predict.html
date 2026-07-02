@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predict Employee Attrition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>HR Analytics</h2>
+            <p>Attrition Platform</p>
+        </div>
+        <button class="theme-toggle" onclick="toggleDarkMode()">🌙 Toggle Theme</button>
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        <a href="/predict" class="nav-link active">🤖 Prediction</a>
+        <a href="/admin" class="nav-link">📂 Upload Dataset</a>
+        <a href="/employees" class="nav-link">👥 Employees</a>
+        <a href="/reports" class="nav-link">📄 Reports</a>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="dashboard-header">
+            <div>
+                <h1>AI Employee Attrition Prediction</h1>
+                <p>Predict risk level, probability, and retention recommendations.</p>
+            </div>
+
+            <div class="header-info">
+                <p><b>Model:</b> Random Forest</p>
+                <p><b>Output:</b> Risk Score</p>
+                <p><b>Status:</b> Ready</p>
+            </div>
+        </div>
+
+        {% if prediction %}
+        <div class="ai-result-layout">
+
+            <div class="prediction-result-card {{ result_class }}">
+                <h2>{{ prediction }}</h2>
+                <p>Attrition Probability: <strong>{{ probability }}%</strong></p>
+
+                <div class="confidence-bar">
+                    <div style="width: {{ probability }}%;"></div>
+                </div>
+
+                <a href="/predict/report" class="prediction-report-btn">Download Prediction Report</a>
+            </div>
+
+            <div class="risk-gauge-card {{ risk_color }}">
+                <div class="gauge-circle">
+                    <span>{{ probability }}%</span>
+                </div>
+                <h2>{{ risk_level }}</h2>
+                <p>Employee attrition risk level</p>
+            </div>
+
+            <div class="recommendation-card">
+                <h2>AI Recommendations</h2>
+                <ul>
+                    {% for rec in recommendations %}
+                    <li>{{ rec }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+        {% endif %}
+
+        <form method="POST" class="professional-predict-form">
+
+            <div class="form-section">
+                <h2>Employee Profile</h2>
+
+                <div class="predict-grid">
+
+                    {% for feature in features %}
+
+                        {% if feature in dropdown_options %}
+                        <div class="predict-field">
+                            <label>{{ feature }}</label>
+                            <select name="{{ feature }}" required>
+                                {% for option in dropdown_options[feature] %}
+                                <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {% elif feature in ["JobSatisfaction", "EnvironmentSatisfaction", "WorkLifeBalance", "RelationshipSatisfaction"] %}
+                        <div class="predict-field">
+                            <label>{{ feature }}</label>
+                            <input type="range" name="{{ feature }}" min="1" max="4" value="3" oninput="this.nextElementSibling.value = this.value">
+                            <output>3</output>
+                        </div>
+
+                        {% elif feature in ["Education", "JobInvolvement", "JobLevel", "PerformanceRating", "StockOptionLevel"] %}
+                        <div class="predict-field">
+                            <label>{{ feature }}</label>
+                            <input type="number" name="{{ feature }}" min="1" max="5" value="3" required>
+                        </div>
+
+                        {% else %}
+                        <div class="predict-field">
+                            <label>{{ feature }}</label>
+                            <input type="number" name="{{ feature }}" value="1" step="any" required>
+                        </div>
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+            </div>
+
+            <button type="submit" class="predict-submit-btn">Predict Attrition</button>
+
+        </form>
+
+        <div class="history-card">
+            <h2>Recent Prediction History</h2>
+
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Prediction</th>
+                        <th>Probability</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in prediction_history %}
+                    <tr>
+                        <td>{{ item.date }}</td>
+                        <td>{{ item.prediction }}</td>
+                        <td>{{ item.probability }}%</td>
+                        <td>{{ item.risk_level }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    <footer class="app-footer">
+    <p>Employee Attrition Analytics Dashboard</p>
+    <span>Built with Flask • Machine Learning • Plotly • Reports</span>
+    </footer>
+    </main>
+
+</div>
+<script>
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+        localStorage.setItem("theme", "dark");
+    } else {
+        localStorage.setItem("theme", "light");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+
+    const forms = document.querySelectorAll("form");
+    const loader = document.getElementById("pageLoader");
+
+    forms.forEach(form => {
+        form.addEventListener("submit", function () {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+        });
+    });
+});
+</script>
+</body>
+<div id="pageLoader" class="page-loader">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+</div>
+</html>
